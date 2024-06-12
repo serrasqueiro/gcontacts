@@ -11,6 +11,8 @@ Author: Henrique Moreira
 
 import sys
 from gcontacts.dprint import dprint
+from gcontacts.simplifier import simpler_words
+from gcontacts.csvpayload import CContent, CPayload
 
 def main():
     """ Main (non-interactive) script """
@@ -67,13 +69,36 @@ def do_it(out, err, path, opts) -> int:
     if code:
         print("Error:", msg, end="\n\n")
         return code
+    cards = dct["cards"]
+    dump_cards(cards)
     return 0
+
+def dump_cards(cards):
+    for idx, card in enumerate(cards, 1):
+        pay = CPayload()
+        lst = simpler_words(pay.line_wrap(card))
+        print(
+            f"{idx}: (len={len(lst)})\n",
+            lst,
+            end="\n\n"
+        )
 
 def process_csv(path:str, err, verbose, debug=0):
     """ Open csv """
-    code, dct = 0, {}
+    code = 0
     dprint("### process_csv():", path, "; debug:", debug, debug=debug)
+    ccc = CContent(path, "contacts")
+    ccc.parse()
     dprint("### process_csv() ends:", code)
+    dct = {
+        "ccc": ccc,
+        "cards": ccc.cards,	# a plain list of cards, comma separated
+    }
+    if verbose > 0:
+        print("# Header:", ccc.head, end="\n<<<\n\n")
+    if verbose >= 3:
+        for idx, field in ccc.fields_list:
+            print("# Field idx:", idx, field)
     return 0, "", dct
 
 if __name__ == "__main__":

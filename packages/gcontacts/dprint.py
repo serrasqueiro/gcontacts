@@ -10,6 +10,7 @@ Author: Henrique Moreira
 DEBUG = 0
 
 def dprint(*args, **kwargs):
+    """ Debug print """
     dbg = kwargs.pop("debug", None)
     if dbg is None:
         if DEBUG <= 0:
