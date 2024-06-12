@@ -10,9 +10,12 @@ Author: Henrique Moreira
 # pylint: disable=missing-function-docstring, consider-using-with
 
 import sys
-from gcontacts.dprint import dprint
+import os.path
+import gcontacts.csvpayload
+import gcontacts.goutprocess
 from gcontacts.simplifier import simpler_words
 from gcontacts.csvpayload import CContent, CPayload
+from gcontacts.dprint import dprint
 
 def main():
     """ Main (non-interactive) script """
@@ -62,9 +65,14 @@ def process(out, err, args):
 def do_it(out, err, path, opts) -> int:
     """ Main script
     """
-    assert path
+    assert path, "do_it()"
     verbose = opts["verbose"]
     debug = int(verbose >= 3)
+    if os.path.isdir(path):
+        code, msg = process_out(["contacts.csv"], (path,), verbose, debug)
+        if code:
+            print("Error:", msg)
+        return code
     code, msg, dct = process_csv(path, err, verbose, debug)
     if code:
         print("Error:", msg, end="\n\n")
@@ -100,6 +108,19 @@ def process_csv(path:str, err, verbose, debug=0):
         for idx, field in ccc.fields_list:
             print("# Field idx:", idx, field)
     return 0, "", dct
+
+def process_out(c_list, c_opts, verbose=0, debug=0):
+    assert debug >= 0, "Debug!"
+    if not c_list:
+        return 1, "No contacts (list)"
+    if len(c_list) > 1:
+        return 3, "Too many inputs"
+    outdir = c_opts[0]
+    path = c_list[0]
+    ccc = CContent(path)
+    ccc.parse()
+    code, msg = gcontacts.goutprocess.process_outs(path, outdir, ccc, debug)
+    return code, msg
 
 if __name__ == "__main__":
     main()

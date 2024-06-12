@@ -104,3 +104,10 @@ def simpler_field(astr:str) -> str:
     """ Returns a simpler field heading """
     res = astr.replace(" ", "").replace("-", "")
     return res
+
+def simplex(astr:str) -> str:
+    """ Returns a simpler wording for easier hashing """
+    res = simpler_field(simpler_words(astr)).upper()
+    for etc in "_()[]{}+!%&":
+        res = res.replace(etc, "")
+    return res
