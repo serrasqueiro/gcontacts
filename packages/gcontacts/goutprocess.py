@@ -133,11 +133,18 @@ def dump_index(outname:str, hindex:str, tups):
         fdout.write(bytes(astr, "ascii"))
     return True
 
-def primary_fields(lst):
+def primary_fields(lst, debug=0):
+    assert isinstance(lst, list), "List"
     simplex = gcontacts.csvpayload.simplex
-    first = list(set(sorted([simplex(ala) for ala in lst[:4] if len(ala) > 1])))
+    first = sorted(
+        set(sorted([simplex(ala) for ala in lst[:4] if len(ala) > 1]))
+    )
     junk = '+'.join(first)
     hexs = hashlib.md5(bytes(junk, "ascii")).hexdigest()[:8]
+    dprint(
+        "primary_fields():", hexs, junk,
+        debug=debug
+    )
     return hexs, first
 
 def calc_hexs2(astr:str) -> str:
