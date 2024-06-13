@@ -27,6 +27,7 @@ class CContent():
             self.head, self.cont = CFields().splash(), self._data
         self.fields_list = []
         self.cards = []
+        self.items = []	# same as cards, but as a list
         self.tidy_header()
 
     def tidy_header(self):
@@ -44,6 +45,13 @@ class CContent():
         pay = CPayload(astr, "c1")
         self.cards = pay.seq
         return True
+
+    def build_items(self):
+        """ Updates 'items' based on 'cards' """
+        self.items = []
+        for card in self.cards:
+            s_list = CPayload().line_wrap(card)
+            self.items.append(s_list)
 
 class CPayload():
     """ Contacts Payload """

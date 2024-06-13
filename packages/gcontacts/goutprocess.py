@@ -19,12 +19,16 @@ from gcontacts.dprint import dprint
 C_SUFFIX = ".txt"
 
 def process_outs(path, outdir, ccc, debug=0):
+    """ Dump multiple files, one per m-key hash """
     # Organize output
     dct, dhex, shex = {}, {}, {}
+    assert ccc.cards, ccc.name
+    assert ccc.items, "No items"
     n_fields = CFields().num_fields()
-    for idx, card in enumerate(ccc.cards, 1):
+    for idx, item in enumerate(ccc.items, 1):
+        lst = ['' if ala is None else ala for ala in item]
+        card = ','.join(lst)
         hexs2 = calc_hexs2(card)
-        lst = CPayload().line_wrap(card)
         hexs1, first = primary_fields(lst)
         dprint(
             f"# Debug: idx={idx} hexs1={hexs1}",
@@ -137,5 +141,6 @@ def primary_fields(lst):
     return hexs, first
 
 def calc_hexs2(astr:str) -> str:
+    assert isinstance(astr, str), "String"
     res = hashlib.md5(bytes(astr, "utf-8")).hexdigest()[:-8]
     return res

@@ -15,6 +15,7 @@ import gcontacts.csvpayload
 import gcontacts.goutprocess
 from gcontacts.simplifier import simpler_words
 from gcontacts.csvpayload import CContent, CPayload
+from gcontacts.gconverter import GCards
 from gcontacts.dprint import dprint
 
 def main():
@@ -117,8 +118,9 @@ def process_out(c_list, c_opts, verbose=0, debug=0):
         return 3, "Too many inputs"
     outdir = c_opts[0]
     path = c_list[0]
-    ccc = CContent(path)
-    ccc.parse()
+    ccc = GCards(path)
+    is_ok = ccc.adapt()
+    assert is_ok, ccc.name
     code, msg = gcontacts.goutprocess.process_outs(path, outdir, ccc, debug)
     return code, msg
 

@@ -27,14 +27,18 @@ class GCards(gcontacts.csvpayload.CContent):
         if self.cards:
             return False
         self.parse()
+        self.items, self._new = [], []
         exp_n = len(self.fields_list)
         if exp_n == CFields().num_fields():
+            for card in self.cards:
+                self.items.append(CPayload().line_wrap(card))
             return True
         msg = self._adapt(self.fields_list, CFields(), debug)
         if msg:
             self.msgs.append(msg)
             return False
-        self.cards = self._new
+        # Refurbish now cards:
+        self.items = self._new
         return True
 
     def _adapt(self, flist, to_fields, debug=0):
