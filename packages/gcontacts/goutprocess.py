@@ -82,7 +82,7 @@ def process_outs(path, outdir, ccc, debug=0):
     for key, m_key in used.items():
         if not m_key:
             return 4, f"Missing to address entry, index {key}"
-    dump_index(os.path.join(outdir, "index.tsv"), used)
+    dump_index(os.path.join(outdir, "index.tsv"), (used, dct))
     return 0, ""
 
 def dump_card_file(outname:str, cont):
@@ -95,10 +95,14 @@ def dump_card_file(outname:str, cont):
         fdout.write(bytes(astr, "utf-8"))
     return True
 
-def dump_index(outname:str, used):
+def dump_index(outname:str, tups):
+    used, dct = tups
     lines = ["#card-idx\tm-key"]
     for key, val in used.items():
-        lines.append(f"{key}\t{val}")
+        unique = not val.endswith("+")
+        first = dct[key][2]
+        suffix = f" # {first}" if first and unique else ""
+        lines.append(f"{key}\t{val}{suffix}")
     astr = '\n'.join(lines) + '\n'
     with open(outname, "wb") as fdout:
         fdout.write(bytes(astr, "ascii"))
