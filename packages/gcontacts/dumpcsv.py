@@ -7,7 +7,7 @@
 Author: Henrique Moreira
 """
 
-# pylint: disable=missing-function-docstring, consider-using-with
+# pylint: disable=missing-function-docstring
 
 import sys
 import os.path

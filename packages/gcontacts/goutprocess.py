@@ -7,13 +7,16 @@
 Author: Henrique Moreira
 """
 
-# pylint: disable=missing-function-docstring, consider-using-with
+# pylint: disable=missing-function-docstring, too-many-locals
 
+import os.path
 import hashlib
 import gcontacts.csvpayload
 from gcontacts.csvpayload import CPayload
 from gcontacts.fields import CFields
 from gcontacts.dprint import dprint
+
+C_SUFFIX = ".txt"
 
 def process_outs(path, outdir, ccc, debug=0):
     # Organize output
@@ -57,13 +60,49 @@ def process_outs(path, outdir, ccc, debug=0):
             dct[idx][2],
             debug=debug,
         )
+    # Marrying m_key: <short-hash>-nn-<24bit-hash>
+    used = {}
     for key in sorted(dct):
-        item = dct[key]
-        hexs1, hexs2, first = item[:3]
-        nums = shex[item[0]]
-        #print(":::", key, item[:3], ">", len(nums), nums)
-        assert nums, "!"
+        used[key] = ""	# Stores the m_key of messages
+    for key, vals in shex.items():
+        for sub_idx, ahex in enumerate(sorted(vals), 11 if len(vals) > 1 else 1):
+            lst_idx = dhex[ahex]
+            subid = f"{sub_idx:02}"
+            m_key = f"{key}-{subid}-{ahex}"
+            #print("m_key:", m_key, lst_idx)
+            for duplicated, idx in enumerate(lst_idx):
+                assert not used[idx], "There?"
+                used[idx] = m_key + ("+" if duplicated else "")
+    # Write individual card files
+    for key, vals in used.items():
+        if vals.endswith("+"):
+            continue
+        dump_card_file(os.path.join(outdir, vals + C_SUFFIX), dct[key][-1])
+    # Inform of output consistency (all entries handled?)
+    for key, m_key in used.items():
+        if not m_key:
+            return 4, f"Missing to address entry, index {key}"
+    dump_index(os.path.join(outdir, "index.tsv"), used)
     return 0, ""
+
+def dump_card_file(outname:str, cont):
+    """ Output a single card file """
+    astr = ""
+    for idx, entry in enumerate(cont, 1):
+        s_num = f"{idx}: " if entry else f"{idx}."
+        astr += f"{s_num}{entry}" + "\n"
+    with open(outname, "wb") as fdout:
+        fdout.write(bytes(astr, "utf-8"))
+    return True
+
+def dump_index(outname:str, used):
+    lines = ["#card-idx\tm-key"]
+    for key, val in used.items():
+        lines.append(f"{key}\t{val}")
+    astr = '\n'.join(lines) + '\n'
+    with open(outname, "wb") as fdout:
+        fdout.write(bytes(astr, "ascii"))
+    return True
 
 def primary_fields(lst):
     simplex = gcontacts.csvpayload.simplex
