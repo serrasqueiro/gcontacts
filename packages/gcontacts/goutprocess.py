@@ -82,7 +82,11 @@ def process_outs(path, outdir, ccc, debug=0):
     for key, m_key in used.items():
         if not m_key:
             return 4, f"Missing to address entry, index {key}"
-    dump_index(os.path.join(outdir, "index.tsv"), (used, dct))
+    dump_index(
+        os.path.join(outdir, "index.tsv"),
+        os.path.join(outdir, "hindex.tsv"),
+        (used, dct),
+    )
     return 0, ""
 
 def dump_card_file(outname:str, cont):
@@ -95,16 +99,32 @@ def dump_card_file(outname:str, cont):
         fdout.write(bytes(astr, "utf-8"))
     return True
 
-def dump_index(outname:str, tups):
+def dump_index(outname:str, hindex:str, tups):
     used, dct = tups
     lines = ["#card-idx\tm-key"]
+    mydict = {}
     for key, val in used.items():
         unique = not val.endswith("+")
         first = dct[key][2]
         suffix = f" # {first}" if first and unique else ""
         lines.append(f"{key}\t{val}{suffix}")
+        if not first or not unique:
+            continue
+        if first[0].isalpha():
+            mydict[first] = val
+        else:
+            mydict["@_" + first] = val
     astr = '\n'.join(lines) + '\n'
     with open(outname, "wb") as fdout:
+        fdout.write(bytes(astr, "ascii"))
+    # Build hindex tsv output:
+    lines = ["#m-key\tup-name"]
+    for key in sorted(mydict):
+        val = mydict[key]
+        new_key = key.replace("@_", "").replace("+", " ")
+        lines.append(f"{val}\t{new_key}")
+    astr = '\n'.join(lines) + '\n'
+    with open(hindex, "wb") as fdout:
         fdout.write(bytes(astr, "ascii"))
     return True
 
