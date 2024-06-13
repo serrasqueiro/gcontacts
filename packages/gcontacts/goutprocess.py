@@ -12,7 +12,6 @@ Author: Henrique Moreira
 import os.path
 import hashlib
 import gcontacts.csvpayload
-from gcontacts.csvpayload import CPayload
 from gcontacts.fields import CFields
 from gcontacts.dprint import dprint
 
@@ -28,8 +27,8 @@ def process_outs(path, outdir, ccc, debug=0):
     for idx, item in enumerate(ccc.items, 1):
         lst = ['' if ala is None else ala for ala in item]
         card = ','.join(lst)
-        hexs2 = calc_hexs2(card)
         hexs1, first = primary_fields(lst)
+        hexs2 = calc_hexs2_item(item, first)
         dprint(
             f"# Debug: idx={idx} hexs1={hexs1}",
             first if first else "[NADA]", [] if first else lst,
@@ -158,4 +157,25 @@ def primary_fields(lst, debug=0):
 def calc_hexs2(astr:str) -> str:
     assert isinstance(astr, str), "String"
     res = hashlib.md5(bytes(astr, "utf-8")).hexdigest()[:-8]
+    return res
+
+def calc_hexs2_item(lst:list, first, debug=0) -> str:
+    assert isinstance(lst, list), "List"
+    assert first, "Empty?"
+    astr = ""
+    for idx, val in enumerate(lst):
+        if idx > 0:
+            astr += ","
+        if not val:
+            continue
+        fld = CFields().fields[idx]
+        if "Phone" in fld:
+            val = val.replace(" ", "")
+            val = val.replace("+351", "")
+        astr += val
+        dprint(
+            "hexs2:", fld, [val], '+'.join(first),
+            debug=debug,
+        )
+    res = calc_hexs2(astr)
     return res
