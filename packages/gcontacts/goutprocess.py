@@ -21,6 +21,7 @@ C_SUFFIX = ".txt"
 def process_outs(path, outdir, ccc, debug=0):
     # Organize output
     dct, dhex, shex = {}, {}, {}
+    n_fields = CFields().num_fields()
     for idx, card in enumerate(ccc.cards, 1):
         hexs2 = calc_hexs2(card)
         lst = CPayload().line_wrap(card)
@@ -30,7 +31,7 @@ def process_outs(path, outdir, ccc, debug=0):
             first if first else "[NADA]", [] if first else lst,
             debug=debug,
         )
-        assert len(lst) == len(CFields().fields), f"Card# {idx} ({first}): expected fields"
+        assert len(lst) == n_fields, f"Card# {idx} ({first}): expected {n_fields} fields"
         dct[idx] = (hexs1, hexs2, '+'.join(first), lst)
         if hexs2 in dhex:
             dhex[hexs2].append(idx)

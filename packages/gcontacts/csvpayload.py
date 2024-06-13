@@ -16,6 +16,7 @@ class CContent():
     """ Contacts content """
     def __init__(self, path:str, name=""):
         self.name = name if name else "?"
+        self.msgs = []
         with open(path, "r", encoding="utf-8") as fdin:
             self._data = fdin.readlines()
         first = self._data[0]

@@ -103,6 +103,11 @@ class CFields():
         self.fields = CFields._get_fields(DEF_FIELDS) if alist is None else []
         self.byname = self._dict_byname()
 
+    def num_fields(self) -> int:
+        anum = len(self.fields)
+        assert anum > 10, self.name
+        return anum
+
     def splash(self) -> str:
         """ Returns the first line, comma separated """
         astr = ",".join(self.fields)
