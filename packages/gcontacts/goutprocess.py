@@ -78,6 +78,7 @@ def process_outs(path, outdir, ccc, debug=0):
             for duplicated, idx in enumerate(lst_idx):
                 assert not used[idx], "There?"
                 used[idx] = m_key + ("+" if duplicated else "")
+                #print("DEBUG:", idx, used[idx], dct[idx][2])
     # Write individual card files
     for key, vals in used.items():
         if vals.endswith("+"):
@@ -116,16 +117,23 @@ def dump_index(outname:str, hindex:str, tups):
         if not first or not unique:
             continue
         if first[0].isalpha():
-            mydict[first] = val
+            if first in mydict:
+                mydict[first].append(val)
+            else:
+                mydict[first] = [val]
         else:
-            mydict["@_" + first] = val
+            if ("@_" + first) in mydict:
+                mydict["@_" + first].append(val)
+            else:
+                mydict["@_" + first] = [val]
     astr = '\n'.join(lines) + '\n'
     with open(outname, "wb") as fdout:
         fdout.write(bytes(astr, "ascii"))
     # Build hindex tsv output:
     lines = ["#m-key\tup-name"]
     for key in sorted(mydict):
-        val = mydict[key]
+        vals = sorted(mydict[key])
+        val = vals[0]	# select the lower (typically 01 or 11)
         new_key = key.replace("@_", "").replace("+", " ")
         lines.append(f"{val}\t{new_key}")
     astr = '\n'.join(lines) + '\n'
