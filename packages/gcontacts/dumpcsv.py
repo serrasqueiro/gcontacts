@@ -121,7 +121,7 @@ def process_out(c_list, c_opts, verbose=0, debug=0):
     ccc = GCards(path)
     is_ok = ccc.adapt()
     assert is_ok, ccc.name
-    code, msg = gcontacts.goutprocess.process_outs(path, outdir, ccc, debug)
+    code, msg = gcontacts.goutprocess.process_outs(path, outdir, ccc, debug=debug)
     return code, msg
 
 if __name__ == "__main__":

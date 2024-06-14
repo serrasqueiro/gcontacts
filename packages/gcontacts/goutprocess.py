@@ -18,14 +18,21 @@ from gcontacts.dprint import dprint
 
 C_SUFFIX = ".txt"
 
-def process_outs(path, outdir, ccc, debug=0):
+ACTION_LIST = {
+    "A": "update All",
+    "N": "Not-verified add",
+}
+
+def process_outs(path, outdir, ccc, k_action="A", debug=0):
     """ Dump multiple files, one per m-key hash """
+    assert k_action in ACTION_LIST, k_action
     # Organize output
     dct, dhex, shex = {}, {}, {}
     assert ccc.cards, ccc.name
     assert ccc.items, "No items"
     n_fields = CFields().num_fields()
     for idx, item in enumerate(ccc.items, 1):
+        dprint(f"Processing ({k_action}) csv line {idx}:", item[0], debug=debug)
         lst = ['' if ala is None else ala for ala in item]
         card = ','.join(lst)
         hexs2 = calc_hexs2(card)
@@ -91,6 +98,7 @@ def process_outs(path, outdir, ccc, debug=0):
     dump_index(
         os.path.join(outdir, "index.tsv"),
         os.path.join(outdir, "hindex.tsv"),
+        k_action,
         (used, dct),
     )
     return 0, ""
@@ -105,7 +113,7 @@ def dump_card_file(outname:str, cont):
         fdout.write(bytes(astr, "utf-8"))
     return True
 
-def dump_index(outname:str, hindex:str, tups):
+def dump_index(outname:str, hindex:str, k_action, tups):
     used, dct = tups
     lines = ["#card-idx\tm-key"]
     mydict = {}
@@ -130,14 +138,16 @@ def dump_index(outname:str, hindex:str, tups):
     with open(outname, "wb") as fdout:
         fdout.write(bytes(astr, "ascii"))
     # Build hindex tsv output:
-    lines = ["#m-key\tup-name"]
+    do_append = k_action != "A"
+    lines = [] if do_append else ["#m-key\tup-name"]
     for key in sorted(mydict):
         vals = sorted(mydict[key])
         val = vals[0]	# select the lower (typically 01 or 11)
         new_key = key.replace("@_", "").replace("+", " ")
         lines.append(f"{val}\t{new_key}")
     astr = '\n'.join(lines) + '\n'
-    with open(hindex, "wb") as fdout:
+    do_append = k_action != "A"
+    with open(hindex, "ab" if do_append else "wb") as fdout:
         fdout.write(bytes(astr, "ascii"))
     return True
 
