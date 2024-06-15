@@ -70,6 +70,11 @@ class CPayload():
         seq = self._my_wording_wrap(astr, False, True)
         return seq
 
+    def unquoted(self, astr):
+        if len(astr) > 1 and astr.startswith('"') and astr[-1] == '"':
+            return astr[1:-1]
+        return astr
+
     def _my_wording_wrap(self, astr, quoted, repl):
         """ Streams multiple lines when double-quotes are there.
         quoted: keeps double-quotes;

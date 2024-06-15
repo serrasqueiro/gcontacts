@@ -11,7 +11,7 @@ Author: Henrique Moreira
 
 import os.path
 from gcontacts.csvpayload import CPayload
-from gcontacts.simplex import primary_fields, calc_hexs2
+from gcontacts.simplex import primary_fields, my_nick, calc_hexs2
 from gcontacts.fields import CFields
 from gcontacts.dprint import dprint
 
@@ -46,7 +46,7 @@ def process_outs(path, outdir, ccc, k_action="A", debug=0):
             debug=debug,
         )
         assert len(lst) == n_fields, f"Card# {idx} ({first}): expected {n_fields} fields"
-        dct[idx] = (hexs1, hexs2, '+'.join(first), lst)
+        dct[idx] = (hexs1, hexs2, my_nick(first), lst)
         if hexs2 in dhex:
             dhex[hexs2].append(idx)
         else:

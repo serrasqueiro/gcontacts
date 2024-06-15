@@ -16,21 +16,28 @@ Author: Henrique Moreira
 
 # pylint: disable=missing-function-docstring
 
+import os
 import gcontacts.fields
+import gcontacts.simplex
 from gcontacts.simplifier import simpler_words
+from gcontacts.csvpayload import CPayload
 
 
 class MLine():
     def __init__(self, astr=None, name=""):
         """ Init. MCard line """
         self.name = name if name else "?"
-        self._line = "" if astr is None else astr
+        self._line = "" if astr is None else self._from_string(astr)
         assert isinstance(self._line, str), "String"
 
     def ascii(self) -> str:
         """ Return un-accented words. """
         astr = simpler_words(self._line)
         return astr
+
+    def _from_string(self, astr):
+        res = CPayload().unquoted(astr)
+        return res
 
     def __str__(self):
         """ Returns the string """
@@ -40,12 +47,53 @@ class MLine():
         """ Returns the string representation """
         return repr(self._line)
 
+class MCards(MLine):
+    def __init__(self, mkeys=None, fromdir=None, name=""):
+        """ Init. cards (contacts) """
+        super().__init__(name=name)
+        self._adir = ""
+        self.mkeys = [] if mkeys is None else mkeys
+        self._raw, self.data = [], []
+        self.byname = {}
+        if fromdir is None:
+            assert isinstance(self.mkeys, list)
+        else:
+            self._adir = fromdir
+            assert not mkeys, self.name
+            self._from_dir(fromdir)
+        self._update()
+
+    def _update(self):
+        """ Several updates, as needed. """
+        dct = {}
+        for mcard in self.mkeys:
+            if mcard.name in dct:
+                dct[mcard.name].append(mcard)
+            else:
+                dct[mcard.name] = [mcard]
+        self.byname = dct
+
+    def _from_dir(self, fromdir:str):
+        lst = [
+            entry.path for entry in os.scandir(fromdir) if entry.path.endswith(".txt")
+        ]
+        for fname in sorted(lst):
+            mkey = os.path.basename(fname)[:8]
+            this = MCard(name = mkey)
+            this.from_file(fname)
+            print("from_file():", mkey, this.data[:4])
+            hexs, first = gcontacts.simplex.primary_fields(this.data)
+            this.nick = gcontacts.simplex.my_nick(first)
+            assert this.name == hexs, f"{this.name} vs {hexs}, {this.data[:4]}: {this}"
+            self.mkeys.append(this)
+        return True
+
 class MCard(MLine):
     """ A single MCard contact """
-    # pylint: disable=line-too-long, anomalous-backslash-in-string
     def __init__(self, alist=None, name=""):
         """ Init. contact. """
         super().__init__(name=name)
+        self.nick = ""
         self.data = [None] * MCard.n_fields() if alist is None else alist
         self._cont = {}
 
@@ -63,6 +111,8 @@ class MCard(MLine):
     def from_file(self, fname) -> bool:
         with open(fname, "r", encoding="utf-8") as fdin:
             msg = self._read_from_list(fdin.readlines())
+        if self.name == "?":
+            self.name = os.path.basename(fname)
         return msg == ""
 
     def _read_from_list(self, alist, prefix=True):
@@ -84,14 +134,23 @@ class MCard(MLine):
             else:
                 value = MLine(line)
             dct[idx] = value
-        self.data, self._cont = self._from_dict(dct)
+        self.data, self._raw = self._from_dict(dct)
+        self._cont = dct
         return ""
 
     def _from_dict(self, dct):
-        res = []
+        res, raw = [], []
         for idx in sorted(dct):
-            res.append(compatible_comma(dct[idx]))
-        return res, dct
+            value = str(dct[idx])
+            res.append(value)
+            raw.append(compatible_comma(value))
+        return res, raw
+
+    def __str__(self):
+        return self.nick
+
+    def __repr__(self):
+        return repr(self.nick)
 
     @staticmethod
     def n_fields():

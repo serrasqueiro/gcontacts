@@ -21,7 +21,7 @@ def simplex(astr:str) -> str:
         res = res.replace(etc, "")
     return res
 
-def primary_fields(lst, debug=0):
+def primary_fields(lst, debug=1):
     assert isinstance(lst, list), "List"
     first = sorted(
         set(sorted([simplex(ala) for ala in lst[:4] if len(ala) > 1]))
@@ -30,9 +30,14 @@ def primary_fields(lst, debug=0):
     hexs = hashlib.md5(bytes(junk, "ascii")).hexdigest()[:8]
     dprint(
         "primary_fields():", hexs, junk,
+        lst[:4],
         debug=debug
     )
     return hexs, first
+
+def my_nick(lst) -> str:
+    assert isinstance(lst, list), "List"
+    return '+'.join(lst)
 
 def calc_hexs2(astr:str) -> str:
     assert isinstance(astr, str), "String"
