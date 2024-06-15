@@ -67,7 +67,7 @@ class GCards(gcontacts.csvpayload.CContent):
     def _run_adapt(self, flist, to_fields, dct, debug=0):
         """ Iterate on every card and appending newly, with 79 fields. """
         res = []
-        for idx, card in enumerate(self.cards, 1):
+        for idx, _ in enumerate(self.cards, 1):
             shown = dct[idx]
             mine = [None] * to_fields.num_fields()
             for k_fld, field in enumerate(shown):

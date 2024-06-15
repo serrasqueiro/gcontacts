@@ -10,6 +10,7 @@ Author: Henrique Moreira
 # pylint: disable=missing-function-docstring
 
 from gcontacts.simplifier import simpler_words
+from gcontacts.simplex import simpler_field
 from gcontacts.fields import CFields
 
 class CContent():
@@ -108,15 +109,3 @@ class CPayload():
         seq = ''.join(seq).splitlines()
         self.texts.append(simpler_words(seq))
         return seq
-
-def simpler_field(astr:str) -> str:
-    """ Returns a simpler field heading """
-    res = astr.replace(" ", "").replace("-", "")
-    return res
-
-def simplex(astr:str) -> str:
-    """ Returns a simpler wording for easier hashing """
-    res = simpler_field(simpler_words(astr)).upper()
-    for etc in "_()[]{}+!%&":
-        res = res.replace(etc, "")
-    return res
