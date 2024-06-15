@@ -21,7 +21,7 @@ def simplex(astr:str) -> str:
         res = res.replace(etc, "")
     return res
 
-def primary_fields(lst, debug=1):
+def primary_fields(lst, debug=0):
     assert isinstance(lst, list), "List"
     first = sorted(
         set(sorted([simplex(ala) for ala in lst[:4] if len(ala) > 1]))

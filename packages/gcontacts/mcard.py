@@ -81,7 +81,7 @@ class MCards(MLine):
             mkey = os.path.basename(fname)[:8]
             this = MCard(name = mkey)
             this.from_file(fname)
-            print("from_file():", mkey, this.data[:4])
+            #print("from_file():", mkey, this.data[:4])
             hexs, first = gcontacts.simplex.primary_fields(this.data)
             this.nick = gcontacts.simplex.my_nick(first)
             assert this.name == hexs, f"{this.name} vs {hexs}, {this.data[:4]}: {this}"
