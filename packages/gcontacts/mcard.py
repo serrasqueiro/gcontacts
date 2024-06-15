@@ -21,6 +21,7 @@ import gcontacts.fields
 import gcontacts.simplex
 from gcontacts.simplifier import simpler_words
 from gcontacts.csvpayload import CPayload
+from gcontacts.dprint import dprint
 
 
 class MLine():
@@ -73,19 +74,22 @@ class MCards(MLine):
                 dct[mcard.name] = [mcard]
         self.byname = dct
 
-    def _from_dir(self, fromdir:str):
+    def _from_dir(self, fromdir:str, debug=0):
         lst = [
             entry.path for entry in os.scandir(fromdir) if entry.path.endswith(".txt")
         ]
+        res = []
         for fname in sorted(lst):
             mkey = os.path.basename(fname)[:8]
             this = MCard(name = mkey)
-            this.from_file(fname)
-            #print("from_file():", mkey, this.data[:4])
-            hexs, first = gcontacts.simplex.primary_fields(this.data)
-            this.nick = gcontacts.simplex.my_nick(first)
-            assert this.name == hexs, f"{this.name} vs {hexs}, {this.data[:4]}: {this}"
-            self.mkeys.append(this)
+            is_ok = this.from_file(fname)
+            dprint(
+                f"from_file(): is_ok?{is_ok}:  {mkey}, {this.data[:4]}",
+                debug=debug,
+            )
+            this.flush()
+            res.append(this)
+        self.mkeys = res
         return True
 
 class MCard(MLine):
@@ -102,6 +106,10 @@ class MCard(MLine):
         res = [simpler_words(line) for line in self.data]
         return res
 
+    def strings(self) -> list:
+        """ Returns the original (quoted) list. """
+        return self._raw
+
     def get_content(self):
         """ Return content as (numeric) dictionary. """
         assert isinstance(self._cont, dict), "Dict!"
@@ -114,6 +122,18 @@ class MCard(MLine):
         if self.name == "?":
             self.name = os.path.basename(fname)
         return msg == ""
+
+    def flush(self) -> bool:
+        hexs, first = gcontacts.simplex.primary_fields(self.data)
+        self.nick = gcontacts.simplex.my_nick(first)
+        assert self.name == hexs, f"{self.name} vs {hexs}, {self.data[:4]}: {self}"
+        self._line = self._to_gcsv(self._raw)
+        return True
+
+    def _to_gcsv(self, raw):
+        """ Convert to google CSV contact format. """
+        fields = [CPayload().csv_encode(ala) for ala in raw]
+        return ','.join(fields)
 
     def _read_from_list(self, alist, prefix=True):
         """ Returns an empty string if all ok. """

@@ -75,6 +75,16 @@ class CPayload():
             return astr[1:-1]
         return astr
 
+    def csv_encode(self, astr):
+        assert isinstance(astr, str), "String"
+        repl1, repl2 = "\\n", "\n"
+        res = self.unquoted(astr)
+        there = res
+        res = res.replace(repl1, repl2)
+        if there == res:
+            return res
+        return '"' + res + '"'
+
     def _my_wording_wrap(self, astr, quoted, repl):
         """ Streams multiple lines when double-quotes are there.
         quoted: keeps double-quotes;
