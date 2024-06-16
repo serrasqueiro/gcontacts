@@ -93,6 +93,17 @@ DEF_FIELDS = {
     79 : "CustomField1Value",
 }
 
+COUNTRY_PREFIXES = {
+    "+1": "US",
+    "+351": "Portugal",
+    "+44": "UK",
+    "+49": "Germany",
+}
+
+COUNTRY_IGNORE = (
+    "+351",
+)
+
 
 class CGeneric():
     """ Generic class """
@@ -154,6 +165,9 @@ class FieldsIndex(CGeneric):
         self._listed, self._unlisted = [], []
         self._my_fields = DEF_FIELDS
         self._initialize(self._my_fields)
+        self.ignore_pre = self._international(
+            COUNTRY_PREFIXES, COUNTRY_IGNORE
+        )
 
     def listed(self) -> list:
         """ Returns the indexes of the used fields. """
@@ -202,6 +216,16 @@ class FieldsIndex(CGeneric):
                 unused.append((idx, name))
                 return True
         return False
+
+    def _international(self, dct_prefix, ignored):
+        res = []
+        if not ignored:
+            return res
+        for pre in ignored:
+            if pre in dct_prefix:
+                assert pre[0] == "+", pre
+                res.append(pre)
+        return res
 
     @staticmethod
     def dormant_nicks():

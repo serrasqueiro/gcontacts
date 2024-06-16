@@ -68,7 +68,7 @@ class MCards(MLine):
         else:
             self._adir = fromdir
             assert not mkeys, self.name
-            self._from_dir(fromdir)
+            self.data = self._from_dir(fromdir)
         self._update()
 
     def _update(self):
@@ -86,6 +86,7 @@ class MCards(MLine):
             entry.path for entry in os.scandir(fromdir) if entry.path.endswith(".txt")
         ]
         res = []
+        self.mkeys = []
         for fname in sorted(lst):
             mkey = os.path.basename(fname)[:8]
             this = MCard(name = mkey)
@@ -96,8 +97,10 @@ class MCards(MLine):
             )
             this.flush()
             res.append(this)
-        self.mkeys = res
-        return True
+            self.mkeys.append(this)
+            if not is_ok:
+                return []
+        return res
 
 
 class MCard(MLine):
@@ -118,6 +121,10 @@ class MCard(MLine):
     def strings(self) -> list:
         """ Returns the original (quoted) list. """
         return self._raw
+
+    def get_hexs1(self) -> str:
+        """ Returns the hexs1 (8 hex chars) """
+        return self.name
 
     def get_content(self):
         """ Return content as (numeric) dictionary. """
