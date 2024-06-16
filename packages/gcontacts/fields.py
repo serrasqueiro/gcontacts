@@ -9,6 +9,8 @@ Author: Henrique Moreira
 
 # pylint: disable=missing-function-docstring
 
+F_IDX_VERSION = "1.00"
+
 DEF_FIELDS = {
     1 : "Name",
     2 : "GivenName",
@@ -92,14 +94,27 @@ DEF_FIELDS = {
 }
 
 
-class CFields():
+class CGeneric():
+    """ Generic class """
+    def __init__(self, name=""):
+        """ Generic initializer """
+        self.name = name if name else "?"
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return repr(self.name)
+
+
+class CFields(CGeneric):
     """ Contacts fields in Google csv """
     # pylint: disable=line-too-long, anomalous-backslash-in-string
     def __init__(self, alist=None, name=""):
         """ Fields taken from
 		head -1 contacts.csv | tr , \\012 | sed 's/ //g;s/-//g' | grep -n . | sed 's/\(.*\):\(.*\)/    \1 : "\2",/'
         """
-        self.name = name if name else "?"
+        super().__init__(name=name)
         self.fields = CFields._get_fields(DEF_FIELDS) if alist is None else []
         self.byname = self._dict_byname()
 
@@ -126,10 +141,16 @@ class CFields():
         return res
 
 
-class FieldsIndex():
+class FieldsIndex(CGeneric):
     """ Fields indexing """
-    def __init__(self):
+    def __init__(self, name=""):
+        super().__init__(FieldsIndex.dormant_nicks()[1])
         self.byname, self.bykey = {}, {}
+        self.bynick = {
+            "Phone": [],
+            "Email": [],
+        }
+        self._fi_version = self.name
         self._listed, self._unlisted = [], []
         self._my_fields = DEF_FIELDS
         self._initialize(self._my_fields)
@@ -146,10 +167,9 @@ class FieldsIndex():
         used, unused, nums = [], [], []
         for idx, key in enumerate(sorted(fields), 1):
             name = fields[key]
-            for dmnt in FieldsIndex.dormant_nicks():
-                if dmnt in name:
-                    unused.append((idx, name))
-                    continue
+            is_dormant = self._got_dormant(idx, name, unused)
+            if is_dormant:
+                continue
             self.byname[name] = idx
             used.append((idx, name))
             if name.count("1") == 1:
@@ -164,11 +184,33 @@ class FieldsIndex():
                     continue
                 self.bykey[akey].append(key)
         self._listed, self._unlisted = used, unused
+        self._hash_nicks(sorted(self.bynick))
+
+    def _hash_nicks(self, keys):
+        for key in keys:
+            name = f"{key}Value"	# e.g. 'PhoneValue'
+            if name not in self.bykey:
+                continue
+            res = []
+            for field in self.bykey[name]:
+                res.append(self.byname[field])
+            self.bynick[key] = res
+
+    def _got_dormant(self, idx, name, unused) -> bool:
+        for dmnt in FieldsIndex.dormant_nicks()[0]:
+            if dmnt in name:
+                unused.append((idx, name))
+                return True
+        return False
 
     @staticmethod
     def dormant_nicks():
         lst = (
-            "Yomi", "Mileage", "Priority",
+            "Yomi",
+            "Initials", "Nickname", "MaidenName",
+            "Billing",		# 'BillingInformation'
+            "Directory",	# 'DirectoryServer'
+            "Mileage", "Priority",
             "Subject", "Relation", "CustomField",
         )
-        return lst
+        return lst, F_IDX_VERSION
