@@ -25,6 +25,7 @@ from gcontacts.dprint import dprint
 
 
 class MLine():
+    """ Single line string (of a csv field) """
     def __init__(self, astr=None, name=""):
         """ Init. MCard line """
         self.name = name if name else "?"
@@ -48,13 +49,19 @@ class MLine():
         """ Returns the string representation """
         return repr(self._line)
 
+
 class MCards(MLine):
+    """ Card set of a directory containing 'mcard'(s).
+    An mcard has the format hexs1-nn-hexs2.txt:
+		where hexs1 are the 8 hex (two nibbles) with 4-fields MD5SUM (added by '+');
+		and hexs2 are the full MD5SUM contents within the card.
+    """
     def __init__(self, mkeys=None, fromdir=None, name=""):
         """ Init. cards (contacts) """
         super().__init__(name=name)
         self._adir = ""
         self.mkeys = [] if mkeys is None else mkeys
-        self._raw, self.data = [], []
+        self.data = []
         self.byname = {}
         if fromdir is None:
             assert isinstance(self.mkeys, list)
@@ -92,12 +99,14 @@ class MCards(MLine):
         self.mkeys = res
         return True
 
+
 class MCard(MLine):
     """ A single MCard contact """
     def __init__(self, alist=None, name=""):
         """ Init. contact. """
         super().__init__(name=name)
         self.nick = ""
+        self._raw = []
         self.data = [None] * MCard.n_fields() if alist is None else alist
         self._cont = {}
 
@@ -179,6 +188,7 @@ class MCard(MLine):
     @staticmethod
     def m_fields():
         return gcontacts.fields.DEF_FIELDS
+
 
 def compatible_comma(astr):
     if isinstance(astr, MLine):

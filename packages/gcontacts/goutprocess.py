@@ -10,7 +10,6 @@ Author: Henrique Moreira
 # pylint: disable=missing-function-docstring, too-many-locals
 
 import os.path
-from gcontacts.csvpayload import CPayload
 from gcontacts.simplex import primary_fields, my_nick, calc_hexs2
 from gcontacts.fields import CFields
 from gcontacts.dprint import dprint

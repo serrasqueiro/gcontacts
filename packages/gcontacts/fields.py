@@ -124,3 +124,51 @@ class CFields():
     def _get_fields(dct):
         res = [dct[key] for key in sorted(dct)]
         return res
+
+
+class FieldsIndex():
+    """ Fields indexing """
+    def __init__(self):
+        self.byname, self.bykey = {}, {}
+        self._listed, self._unlisted = [], []
+        self._my_fields = DEF_FIELDS
+        self._initialize(self._my_fields)
+
+    def listed(self) -> list:
+        """ Returns the indexes of the used fields. """
+        return [anum for anum, _ in self._listed]
+
+    def unlisted(self) -> list:
+        """ Returns the indexes of the dormant (unused) fields. """
+        return [anum for anum, _ in self._unlisted]
+
+    def _initialize(self, fields):
+        used, unused, nums = [], [], []
+        for idx, key in enumerate(sorted(fields), 1):
+            name = fields[key]
+            for dmnt in FieldsIndex.dormant_nicks():
+                if dmnt in name:
+                    unused.append((idx, name))
+                    continue
+            self.byname[name] = idx
+            used.append((idx, name))
+            if name.count("1") == 1:
+                nums.append(name)
+        self.bykey = {}
+        for name in nums:
+            akey = name.replace("1", "")
+            self.bykey[akey] = [name]
+            for anum in range(2, 10):
+                key = name.replace("1", str(anum))
+                if key not in self.byname:
+                    continue
+                self.bykey[akey].append(key)
+        self._listed, self._unlisted = used, unused
+
+    @staticmethod
+    def dormant_nicks():
+        lst = (
+            "Yomi", "Mileage", "Priority",
+            "Subject", "Relation", "CustomField",
+        )
+        return lst
