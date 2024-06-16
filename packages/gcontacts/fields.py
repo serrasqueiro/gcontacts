@@ -93,6 +93,12 @@ DEF_FIELDS = {
     79 : "CustomField1Value",
 }
 
+DEF_GRP_MEMBERSHIP = {
+    "* starred": (1, "star"),
+    "* myContacts": (2, "contacts"),
+    "* friends": (3, "friends"),
+}
+
 COUNTRY_PREFIXES = {
     "+1": "US",
     "+351": "Portugal",
@@ -103,6 +109,10 @@ COUNTRY_PREFIXES = {
 COUNTRY_IGNORE = (
     "+351",
 )
+
+PHONE_REGEXP_US = '^(\+\d{1,3}\s?)?\(?(\d{2,3})\)?[\s.-]?(\d{3}[\s.-]?\d{4})$'
+
+PHONE_REGEXP_WW = '^(\+\d{1,3}\s?)?\(?(\d{2,3})\)?\s?(\d{3}\s?\d{4})$'
 
 
 class CGeneric():
@@ -168,6 +178,13 @@ class FieldsIndex(CGeneric):
         self.ignore_pre = self._international(
             COUNTRY_PREFIXES, COUNTRY_IGNORE
         )
+        self.members = DEF_GRP_MEMBERSHIP
+        self.phone_regexp = {
+            "us": PHONE_REGEXP_US,
+            "ww": PHONE_REGEXP_WW,
+        }
+        self.my_phone_regexp = self.phone_regexp["us"]
+        self.my_phone_regcomp = None
 
     def listed(self) -> list:
         """ Returns the indexes of the used fields. """
