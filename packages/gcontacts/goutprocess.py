@@ -40,11 +40,17 @@ def process_outs(path, outdir, ccc, k_action="A", debug=0):
         hexs2 = calc_hexs2(card)
         hexs1, first = primary_fields(lst)
         dprint(
-            f"# Debug: idx={idx} hexs1={hexs1}",
+            f"# Debug: idx={idx} n_fields={n_fields} hexs1={hexs1}",
             first if first else "[NADA]", [] if first else lst,
             debug=debug,
         )
-        assert len(lst) == n_fields, f"Card# {idx} ({first}): expected {n_fields} fields"
+        msg = f"Card# {idx} ({first}): expected {n_fields} fields, got {len(lst)}"
+        dprint(
+            msg,
+            "\n", item,
+            debug=int(len(lst) != n_fields),
+        )
+        assert len(lst) == n_fields, msg
         dct[idx] = (hexs1, hexs2, my_nick(first), lst)
         if hexs2 in dhex:
             dhex[hexs2].append(idx)
