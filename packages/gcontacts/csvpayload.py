@@ -15,14 +15,18 @@ from gcontacts.fields import CFields
 
 class CContent():
     """ Contacts content """
+    GGLE_CSV_START_FIELDS = ("Name", "First Name")
+
     def __init__(self, path:str, name=""):
         self.name = name if name else "?"
         self.msgs = []
         with open(path, "r", encoding="utf-8") as fdin:
             self._data = fdin.readlines()
         first = self._data[0]
-        self.has_header = first.startswith("Name,")
-        if self.has_header:
+        admissible = CContent.GGLE_CSV_START_FIELDS
+        valid = first.split(",", maxsplit=1)[0].startswith(admissible)
+        self.has_header = valid
+        if valid:
             self.head, self.cont = first.rstrip(), self._data[1:]
         else:
             self.head, self.cont = CFields().splash(), self._data

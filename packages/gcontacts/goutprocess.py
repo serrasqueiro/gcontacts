@@ -47,7 +47,8 @@ def process_outs(path, outdir, ccc, k_action="A", debug=0):
         msg = f"Card# {idx} ({first}): expected {n_fields} fields, got {len(lst)}"
         dprint(
             msg,
-            "\n", item,
+            f"(has_header={ccc.has_header})\n{item}",
+            end="\n\n",
             debug=int(len(lst) != n_fields),
         )
         assert len(lst) == n_fields, msg

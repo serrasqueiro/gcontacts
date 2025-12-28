@@ -9,9 +9,61 @@ Author: Henrique Moreira
 
 # pylint: disable=missing-function-docstring
 
-F_IDX_VERSION = "1.00"
+F_IDX_VERSION = "1.12"
 
-DEF_FIELDS = {
+DEF_FIELDS_V112 = {
+    1: "FirstName",
+    2: "MiddleName",
+    3: "LastName",
+    4: "PhoneticFirstName",
+    5: "PhoneticMiddleName",
+    6: "PhoneticLastName",
+    7: "NamePrefix",
+    8: "NameSuffix",
+    9: "Nickname",
+    10: "FileAs",
+    11: "OrganizationName",
+    12: "OrganizationTitle",
+    13: "OrganizationDepartment",
+    14: "Birthday",
+    15: "Notes",
+    16: "Photo",
+    17: "Labels",
+    18: "Email1Label",
+    19: "Email1Value",
+    20: "Email2Label",
+    21: "Email2Value",
+    22: "Phone1Label",
+    23: "Phone1Value",
+    24: "Phone2Label",
+    25: "Phone2Value",
+    26: "Phone3Label",
+    27: "Phone3Value",
+    28: "Phone4Label",
+    29: "Phone4Value",
+    30: "Address1Label",
+    31: "Address1Formatted",
+    32: "Address1Street",
+    33: "Address1City",
+    34: "Address1POBox",
+    35: "Address1Region",
+    36: "Address1PostalCode",
+    37: "Address1Country",
+    38: "Address1ExtendedAddress",
+    39: "Address2Label",
+    40: "Address2Formatted",
+    41: "Address2Street",
+    42: "Address2City",
+    43: "Address2POBox",
+    44: "Address2Region",
+    45: "Address2PostalCode",
+    46: "Address2Country",
+    47: "Address2ExtendedAddress",
+    48: "Website1Label",
+    49: "Website1Value",
+}
+
+DEF_FIELDS_V100 = {
     1 : "Name",
     2 : "GivenName",
     3 : "AdditionalName",
@@ -92,6 +144,9 @@ DEF_FIELDS = {
     78 : "CustomField1Type",
     79 : "CustomField1Value",
 }
+
+DEF_FIELDS = DEF_FIELDS_V112
+
 
 DEF_GRP_MEMBERSHIP = {
     "* starred": (1, "star"),
