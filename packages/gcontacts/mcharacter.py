@@ -42,19 +42,20 @@ class CardSeq(gcontacts.mcard.MCard):
         hit = self.nick2index.get(nick)
         return [] if hit is None else hit
 
-    def write_outs(self):
+    def write_outs(self, debug=0):
         for key in sorted(self.outs):
             outname, head = self.outs[key]
-            seq = self._what_output(key, outname, head)
+            seq = self._what_output(key, outname, debug=debug)
             with open(outname, "wb") as fdout:
                 fdout.write(bytes(head + "\n", "ascii"))
                 for line in seq:
                     fdout.write(bytes(line + "\n", "ascii"))
         return True
 
-    def _what_output(self, key, outname, head):
+    def _what_output(self, key, outname, debug):
         """ Calculate and write output """
         res = []
+        dprint(f"what_output(): {[outname]}: key={key}", debug=debug)
         if key != "phone":
             return []
         dphone_who, dphone_eql = {}, {}
@@ -168,8 +169,9 @@ class MainCard(gcontacts.mcard.MCard):
             for single in s_value.split(":::"):
                 new = heal(single, "R")
                 self._update_phones(heal(single), single.strip(), new)
+        idx_labels = fix.byname["GroupMembership"] if fix.name == "1.00" else fix.byname["Labels"]
         self._groups = self._get_groups(
-            self.data[fix.byname["GroupMembership"] - 1]
+            self.data[idx_labels - 1]
         )
         return True
 

@@ -7,7 +7,7 @@
 Author: Henrique Moreira
 """
 
-DEBUG = 1
+DEBUG = 0
 
 def dprint(*args, **kwargs):
     """ Debug print """

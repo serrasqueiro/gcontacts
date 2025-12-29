@@ -14,6 +14,10 @@ from gcontacts.mcharacter import CardSeq
 from gcontacts.dprint import dprint
 
 
+def main():
+    process_outtext("hashed", debug=1)
+
+
 def process_outtext(indir, outdir="", debug=0):
     """ Dump text-based output from MCards() """
     outdir = outdir if outdir else indir
@@ -25,5 +29,9 @@ def process_outtext(indir, outdir="", debug=0):
     cards = gcontacts.mcard.MCards(fromdir=indir)
     cseq = CardSeq(cards, outdir)
     code, msg = 0, ""
-    cseq.write_outs()
+    cseq.write_outs(debug=debug)
     return code, msg, cseq
+
+
+if __name__ == "__main__":
+    main()
